@@ -1,5 +1,22 @@
 var checkout = {};
 
+// Stable per-browser id. Sent as unstructured.id (part of the swagger Message model);
+// LF0 uses it as the Lex sessionId, which lets LF1/LF2 remember the user's last search.
+function getUserId() {
+  var key = 'diningConciergeUserId';
+  var id = null;
+  try { id = window.localStorage.getItem(key); } catch (e) {}
+  if (!id) {
+    id = 'user-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10);
+    try { window.localStorage.setItem(key, id); } catch (e) {}
+  }
+  return id;
+}
+
+function escapeHtml(text) {
+  return $('<div>').text(text).html();
+}
+
 $(document).ready(function() {
   var $messages = $('.messages-content'),
     d, h, m,
@@ -31,7 +48,9 @@ $(document).ready(function() {
       messages: [{
         type: 'unstructured',
         unstructured: {
-          text: message
+          id: getUserId(),
+          text: message,
+          timestamp: new Date().toISOString()
         }
       }]
     }, {});
@@ -42,7 +61,7 @@ $(document).ready(function() {
     if ($.trim(msg) == '') {
       return false;
     }
-    $('<div class="message message-personal">' + msg + '</div>').appendTo($('.mCSB_container')).addClass('new');
+    $('<div class="message message-personal">' + escapeHtml(msg) + '</div>').appendTo($('.mCSB_container')).addClass('new');
     setDate();
     $('.message-input').val(null);
     updateScrollbar();
@@ -59,7 +78,7 @@ $(document).ready(function() {
 
           for (var message of messages) {
             if (message.type === 'unstructured') {
-              insertResponseMessage(message.unstructured.text);
+              insertResponseMessage(escapeHtml(message.unstructured.text).replace(/\n/g, '<br>'));
             } else if (message.type === 'structured' && message.structured.type === 'product') {
               var html = '';
 
