@@ -1,0 +1,13 @@
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "TalkToLex",
+			"Effect": "Allow",
+			"Action": [
+				"lex:RecognizeText"
+			],
+			"Resource": "arn:aws:lex:us-east-1:708622089210:bot-alias/*"
+		}
+	]
+}

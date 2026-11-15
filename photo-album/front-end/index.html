@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Photo Album</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <header><h1>Photo Album</h1></header>
+  <main>
+    <section class="card">
+      <h2>Search photos</h2>
+      <form id="search-form">
+        <input id="search-input" type="text" placeholder='e.g. "dog", "show me cats and dogs", or a custom label' autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+      <p id="search-status" class="status"></p>
+      <div id="results" class="grid"></div>
+    </section>
+
+    <section class="card">
+      <h2>Upload a photo</h2>
+      <form id="upload-form">
+        <input id="file-input" type="file" accept="image/png,image/jpeg">
+        <input id="labels-input" type="text" placeholder="Custom labels, comma separated (e.g. Sam, Sally)" autocomplete="off">
+        <button type="submit">Upload</button>
+      </form>
+      <p id="upload-status" class="status"></p>
+    </section>
+  </main>
+
+  <!-- API Gateway generated SDK (SDK1). Replace assets/js/sdk/* with your generated SDK, see assets/js/sdk/README.txt -->
+  <script src="assets/js/sdk/lib/axios/dist/axios.standalone.js"></script>
+  <script src="assets/js/sdk/lib/CryptoJS/rollups/crypto-js.js"></script>
+  <script src="assets/js/sdk/lib/CryptoJS/rollups/sha256.js"></script>
+  <script src="assets/js/sdk/lib/CryptoJS/components/hmac.js"></script>
+  <script src="assets/js/sdk/lib/CryptoJS/components/enc-base64.js"></script>
+  <script src="assets/js/sdk/lib/url-template/url-template.js"></script>
+  <script src="assets/js/sdk/lib/apiGatewayCore/sigV4Client.js"></script>
+  <script src="assets/js/sdk/lib/apiGatewayCore/apiGatewayClient.js"></script>
+  <script src="assets/js/sdk/lib/apiGatewayCore/simpleHttpClient.js"></script>
+  <script src="assets/js/sdk/lib/apiGatewayCore/utils.js"></script>
+  <script src="assets/js/sdk/apigClient.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

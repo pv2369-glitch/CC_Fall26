@@ -1,0 +1,199 @@
+swagger: "2.0"
+info:
+  title: AI Photo Search
+  description: AI Photo Search API
+  version: 1.0.0
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+
+x-amazon-apigateway-binary-media-types:
+  - image/jpeg
+  - image/jpg
+  - image/png
+
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: x-api-key
+    in: header
+
+paths:
+  /search:
+    get:
+      summary: photo search method
+      operationId: searchPhotos
+      produces:
+        - application/json
+      parameters:
+        - in: query
+          name: q
+          type: string
+          required: false
+          description: the string to be searched
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: search results
+          schema:
+            $ref: "#/definitions/SearchResponse"
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        uri: arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:708622089210:function:search-photos/invocations
+        passthroughBehavior: when_no_match
+    options:
+      summary: CORS preflight
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: CORS headers
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        passthroughBehavior: when_no_match
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,x-api-key'"
+
+  /upload:
+    put:
+      summary: photo upload method (S3 proxy)
+      operationId: uploadPhoto
+      consumes:
+        - image/png
+        - image/jpg
+        - image/jpeg
+      produces:
+        - application/json
+      parameters:
+        - in: header
+          name: x-object-key
+          type: string
+          required: true
+          description: the S3 object key (file name) to store the photo under
+        - in: header
+          name: x-amz-meta-customLabels
+          type: string
+          required: false
+          description: comma-separated custom labels, e.g. "Sam, Sally"
+        - in: header
+          name: Content-Type
+          type: string
+          required: false
+      security:
+        - api_key: []
+      responses:
+        "200":
+          description: S3 PUT operation response
+          schema:
+            type: object
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+        "403":
+          description: Unauthorized
+          schema:
+            $ref: "#/definitions/Error"
+        "500":
+          description: Unexpected error
+          schema:
+            $ref: "#/definitions/Error"
+      x-amazon-apigateway-integration:
+        type: aws
+        httpMethod: PUT
+        uri: arn:aws:apigateway:us-east-1:s3:path/photo-storage-pv2369/{object}
+        credentials: arn:aws:iam::708622089210:role/API_S3_ROLE
+        passthroughBehavior: when_no_match
+        requestParameters:
+          integration.request.path.object: method.request.header.x-object-key
+          integration.request.header.x-amz-meta-customLabels: method.request.header.x-amz-meta-customLabels
+          integration.request.header.Content-Type: method.request.header.Content-Type
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+    options:
+      summary: CORS preflight
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        "200":
+          description: CORS headers
+          headers:
+            Access-Control-Allow-Origin:
+              type: string
+            Access-Control-Allow-Methods:
+              type: string
+            Access-Control-Allow-Headers:
+              type: string
+      x-amazon-apigateway-integration:
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        passthroughBehavior: when_no_match
+        responses:
+          default:
+            statusCode: "200"
+            responseParameters:
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'PUT,OPTIONS'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,x-api-key,x-amz-meta-customLabels,x-object-key'"
+
+definitions:
+  SearchResponse:
+    type: object
+    properties:
+      results:
+        type: array
+        items:
+          $ref: "#/definitions/Photo"
+  Photo:
+    type: object
+    properties:
+      url:
+        type: string
+      labels:
+        type: array
+        items:
+          type: string
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
