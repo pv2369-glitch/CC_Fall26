@@ -1,0 +1,17 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadPhotos",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject"],
+      "Resource": "arn:aws:s3:::photo-storage-pv2369/*"
+    },
+    {
+      "Sid": "DetectLabels",
+      "Effect": "Allow",
+      "Action": ["rekognition:DetectLabels"],
+      "Resource": "*"
+    }
+  ]
+}
