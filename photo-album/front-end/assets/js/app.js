@@ -1,9 +1,14 @@
 (function () {
   var client = apigClientFactory.newClient({ apiKey: window.APP_CONFIG.apiKey });
 
+  var sdkCopy = apiGateway.core.utils.copy;
+  apiGateway.core.utils.copy = function (obj) {
+    if (obj instanceof Blob || obj instanceof ArrayBuffer || ArrayBuffer.isView(obj)) return obj;
+    return sdkCopy(obj);
+  };
+
   function $(id) { return document.getElementById(id); }
 
-  // ---------- Search: GET /search?q=... ----------
   $("search-form").addEventListener("submit", function (e) {
     e.preventDefault();
     var q = $("search-input").value.trim();
@@ -19,7 +24,7 @@
         var img = document.createElement("img");
         img.src = r.url; img.alt = (r.labels || []).join(", ");
         var cap = document.createElement("figcaption");
-        cap.textContent = (r.labels || []).join(", ");   // textContent: no HTML injection
+        cap.textContent = (r.labels || []).join(", ");
         fig.appendChild(img); fig.appendChild(cap); grid.appendChild(fig);
       });
     }).catch(function (err) {
@@ -28,7 +33,6 @@
     });
   });
 
-  // ---------- Upload: PUT /upload with x-object-key (file name) and x-amz-meta-customLabels ----------
   $("upload-form").addEventListener("submit", function (e) {
     e.preventDefault();
     var file = $("file-input").files[0], status = $("upload-status");
@@ -38,11 +42,15 @@
     status.textContent = "Uploading...";
     var reader = new FileReader();
     reader.onload = function () {
-      // Uint8Array, not File/ArrayBuffer: the generated SDK drops bodies that have no enumerable keys.
       var body = new Uint8Array(reader.result);
-      var headers = { "Content-Type": file.type, "x-object-key": file.name };
-      if (labels) headers["x-amz-meta-customLabels"] = labels;
-      client.uploadPut({}, body, { headers: headers }).then(function () {
+      var params = {
+        "x-object-key": file.name,
+        "Content-Type": file.type,
+        "x-amz-meta-customLabels": labels
+      };
+      Promise.resolve().then(function () {
+        return client.uploadPut(params, body, {});
+      }).then(function () {
         status.textContent = "Uploaded " + file.name + (labels ? " with labels: " + labels : "") +
           ". It can take a few seconds to be searchable.";
         $("upload-form").reset();

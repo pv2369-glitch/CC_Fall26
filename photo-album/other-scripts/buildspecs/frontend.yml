@@ -1,0 +1,5 @@
+version: 0.2
+phases:
+  build:
+    commands:
+      - aws s3 sync photo-album/front-end/ "s3://$FRONTEND_BUCKET/" --delete --exclude "assets/js/config.js"

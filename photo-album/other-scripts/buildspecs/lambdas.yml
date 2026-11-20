@@ -1,0 +1,11 @@
+version: 0.2
+phases:
+  build:
+    commands:
+      - mkdir -p build
+      - (cd photo-album/lambda-functions/index-photos && zip -q "$CODEBUILD_SRC_DIR/build/index-photos.zip" lambda_function.py)
+      - (cd photo-album/lambda-functions/search-photos && zip -q "$CODEBUILD_SRC_DIR/build/search-photos.zip" lambda_function.py)
+  post_build:
+    commands:
+      - aws lambda update-function-code --function-name "$LF1_NAME" --zip-file fileb://build/index-photos.zip
+      - aws lambda update-function-code --function-name "$LF2_NAME" --zip-file fileb://build/search-photos.zip
