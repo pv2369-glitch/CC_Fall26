@@ -59,7 +59,6 @@ def build_document(bucket, key, created, rek_labels, custom_labels):
 
 
 def lambda_handler(event, context):
-    print("This is a canon event!!!!")
     indexed = []
     for record in event.get("Records", []):
         bucket = record["s3"]["bucket"]["name"]
