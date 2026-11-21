@@ -183,7 +183,6 @@ Resources:
 
 
           def parse_custom_labels(metadata):
-              """head_object lowercases user-metadata keys, so x-amz-meta-customLabels -> 'customlabels'."""
               raw = (metadata or {}).get("customlabels", "")
               return [p.strip().lower() for p in raw.split(",") if p.strip()]
 
